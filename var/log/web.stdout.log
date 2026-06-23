@@ -1,6 +1,0 @@
-Jun 23 04:55:25 ip-172-31-24-254 web[2192]: > Elastic-Beanstalk-Sample-App@0.0.1 start
-Jun 23 04:55:25 ip-172-31-24-254 web[2192]: > node app.js
-Jun 23 04:55:26 ip-172-31-24-254 web[2206]: Server running at http://127.0.0.1:8080/
-Jun 23 06:15:38 ip-172-31-24-254 web[5441]: > simple-nodejs-app@1.0.0 start
-Jun 23 06:15:38 ip-172-31-24-254 web[5441]: > node index.js
-Jun 23 06:15:38 ip-172-31-24-254 web[5455]: Listening at port 3000...
