@@ -1,9 +1,13 @@
-FROM node
-WORKDIR /app
+FROM node:20-alpine
 
-COPY . .
-EXPOSE 3000
+WORKDIR /app
 
 COPY package*.json ./
 
-ENTRYPOINT start npm
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD [ "node", "index.js" ]
