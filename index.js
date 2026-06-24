@@ -48,7 +48,7 @@ app.get('/index', (req,response) =>{
 });
 
 // FIX: Use Elastic Beanstalk's dynamic port variable, or default to 3000 for local testing
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
     console.log(`Listening at port ${port}...`);
