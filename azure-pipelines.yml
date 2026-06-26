@@ -6,11 +6,11 @@ pool:
 
 variables:
   # Replace these with your actual Azure names
-  azureServiceConnection: 'Azure-OIDC-Connection'
+  azureServiceConnection: 'Azure-Connection-App'
   acrName: 'Demoapp1233'
   repositoryName: 'node-app'
   containerAppName: 'node-app'
-  resourceGroupName: 'your-resource-group-name'
+  resourceGroupName: 'container-app'
   imageTag: '$(Build.BuildId)'
 
 stages:
