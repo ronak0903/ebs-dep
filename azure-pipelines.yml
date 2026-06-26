@@ -5,12 +5,11 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  # Replace these with your actual Azure names
-  azureServiceConnection: 'Azure-Connection-App'
+  azureServiceConnection: 'Azure-Connection-App' # Your working connection
   acrName: 'Demoapp1233'
   repositoryName: 'node-app'
   containerAppName: 'node-app'
-  resourceGroupName: 'container-app'
+  resourceGroupName: 'your-resource-group-name' # Remember to change this to your actual resource group name!
   imageTag: '$(Build.BuildId)'
 
 stages:
@@ -20,29 +19,23 @@ stages:
   - job: Build
     displayName: 'Build, Push, and Deploy'
     steps:
-    # 1. Log in to your Azure Container Registry
+    # 1. Log in, Build, and Push using Azure CLI
     - task: AzureCLI@2
-      displayName: 'Docker Login to ACR'
+      displayName: 'Build and Push Docker Image to ACR'
       inputs:
         azureSubscription: '$(azureServiceConnection)'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
+          # Log into your Azure Container Registry
           az acr login --name $(acrName)
+          
+          # Build and push the image directly using the Docker CLI on the runner
+          docker build -t $(acrName).azurecr.io/$(repositoryName):$(imageTag) -t $(acrName).azurecr.io/$(repositoryName):latest .
+          docker push $(acrName).azurecr.io/$(repositoryName):$(imageTag)
+          docker push $(acrName).azurecr.io/$(repositoryName):latest
 
-    # 2. Build and Push the Docker image
-    - task: Docker@2
-      displayName: 'Build and Push Image'
-      inputs:
-        containerRegistry: '$(azureServiceConnection)' # Uses the service connection mapping
-        repository: '$(repositoryName)'
-        command: 'buildAndPush'
-        Dockerfile: '**/Dockerfile'
-        tags: |
-          $(imageTag)
-          latest
-
-    # 3. Deploy the new image revision to your Container App
+    # 2. Deploy the new image revision to your Container App
     - task: AzureContainerApps@1
       displayName: 'Deploy to Azure Container Apps'
       inputs:
