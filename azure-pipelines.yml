@@ -9,7 +9,7 @@ variables:
   acrName: 'Demoapp1233'
   repositoryName: 'node-app'
   containerAppName: 'node-app'
-  resourceGroupName: 'container-app' 
+  resourceGroupName: 'container-app' # Updated based on your Azure portal URL path!
   imageTag: '$(Build.BuildId)'
 
 stages:
@@ -19,7 +19,7 @@ stages:
   - job: Build
     displayName: 'Build, Push, and Deploy'
     steps:
-
+    # 1. Log in, Build, and Push using pipeline variables
     - task: AzureCLI@2
       displayName: 'Build and Push Docker Image to ACR'
       inputs:
@@ -27,19 +27,17 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          # 1. Dynamically fetch the admin password from Azure
-          ACR_PASSWORD=$(az acr credential show --name $(acrName) --query "passwords.value" -o tsv)
+          # 1. Log in securely using the pipeline secret variable
+          echo $(ACR_PASSWORD) | docker login $(acrName).azurecr.io --username $(acrName) --password-stdin
           
-          # 2. Log in securely via Docker CLI directly
-          echo $ACR_PASSWORD | docker login $(acrName).azurecr.io --username $(acrName) --password-stdin
-          
-          # 3. Build the image with both the unique build ID and latest tags
+          # 2. Build the image layers
           docker build -t $(acrName).azurecr.io/$(repositoryName):$(imageTag) -t $(acrName).azurecr.io/$(repositoryName):latest .
           
-          # 4. Push both image tags to your Azure Container Registry
+          # 3. Push both image tags to your Azure Container Registry
           docker push $(acrName).azurecr.io/$(repositoryName):$(imageTag)
           docker push $(acrName).azurecr.io/$(repositoryName):latest
 
+    # 2. Deploy the new image revision to your Container App
     - task: AzureContainerApps@1
       displayName: 'Deploy to Azure Container Apps'
       inputs:
