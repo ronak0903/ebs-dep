@@ -1,0 +1,52 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  # Replace these with your actual Azure names
+  azureServiceConnection: 'Azure-OIDC-Connection'
+  acrName: 'Demoapp1233'
+  repositoryName: 'node-app'
+  containerAppName: 'node-app'
+  resourceGroupName: 'your-resource-group-name'
+  imageTag: '$(Build.BuildId)'
+
+stages:
+- stage: BuildAndDeploy
+  displayName: 'Build and Deploy to Container App'
+  jobs:
+  - job: Build
+    displayName: 'Build, Push, and Deploy'
+    steps:
+    # 1. Log in to your Azure Container Registry
+    - task: AzureCLI@2
+      displayName: 'Docker Login to ACR'
+      inputs:
+        azureSubscription: '$(azureServiceConnection)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az acr login --name $(acrName)
+
+    # 2. Build and Push the Docker image
+    - task: Docker@2
+      displayName: 'Build and Push Image'
+      inputs:
+        containerRegistry: '$(azureServiceConnection)' # Uses the service connection mapping
+        repository: '$(repositoryName)'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          $(imageTag)
+          latest
+
+    # 3. Deploy the new image revision to your Container App
+    - task: AzureContainerApps@1
+      displayName: 'Deploy to Azure Container Apps'
+      inputs:
+        azureSubscription: '$(azureServiceConnection)'
+        imageToDeploy: '$(acrName).azurecr.io/$(repositoryName):$(imageTag)'
+        containerAppName: '$(containerAppName)'
+        resourceGroup: '$(resourceGroupName)'
